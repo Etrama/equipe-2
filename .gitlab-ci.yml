@@ -1,0 +1,9 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  image: mcr.microsoft.com/azure-cli
+  script:
+    - echo "$AZURE_PUBLISH_PROFILE" > publishprofile.xml
+    - az webapp deployment slot swap --resource-group $AZURE_WEBAPP_NAME fi
