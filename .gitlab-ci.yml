@@ -4,8 +4,9 @@ stages:
 deploy:
   stage: deploy
   image: mcr.microsoft.com/azure-cli
+  before_script:
+    - apk update && apk add zip
   script:
     - echo "$AZURE_PUBLISH_PROFILE" > publishprofile.xml
-    - apt-get update && apt-get install -y zip
     - zip -r app.zip app.py requirements.txt
     - az webapp deployment source config-zip --resource-group "$AZURE_RESOURCE_GROUP" --name "$AZURE_WEBAPP_NAME" --src app.zip
