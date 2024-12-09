@@ -33,7 +33,29 @@ python -m streamlit run app.py
 
 ## 📂 Accès aux Données
 
-TODOOO
+Voici un exemple de connexion avec psycopg2 en Python :
+
+```bash
+pip install psycopg2-binary
+```
+```python
+import psycopg2
+
+# Les vrai valeurs sont dans le powerpoint
+hostname = "<hostname>"
+database = "<database>"
+user = "<user>"
+password = "<password>" # DO NOT PUSH ACTUAL VALUE IN GITLAB
+
+try:
+    conn = psycopg2.connect(
+        host=hostname, database=database, user=user, password=password
+    )
+    print("Connexion réussie")
+except Exception as e:
+    print(f"Erreur de connexion : {e}")
+```
+Libre à vous d'utiliser le langage ou l'outils de votre choix pour vous connecter a la bdd
 
 ## 📊 Structure de l'Application
 
