@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 # Page configuration
 st.set_page_config(
-    page_title="Prediction App",
+    page_title="Siackathon Team 2: Prediction App",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -222,6 +222,6 @@ st.sidebar.markdown("---")
 st.sidebar.markdown("### About")
 st.sidebar.info(
     """
-    This is a demo application
+    Application developed by [Siackathon Team 2]
     """
 )
