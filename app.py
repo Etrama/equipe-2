@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
@@ -50,28 +51,32 @@ def generate_sample_data():
 
 
 # Create and train model
-def train_model(data):
-    X = data[["var1", "var2", "var3", "var4"]]
-    y = data["target"]
+def rf_model_iron():
+    with open('models/rf_iron.pkl', 'rb') as f:
+        model = pickle.load(f)
+    return model
 
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X_scaled, y)
-
-    return model, scaler
+def rf_model_silicate():
+    with open('models/rf_silicate.pkl', 'rb') as f:
+        model = pickle.load(f)
+    return model
 
 
-# Prediction function
-def predict(model, scaler, features):
-    features_scaled = scaler.transform(features)
-    return model.predict(features_scaled)
+# Prediction function for the 'iron' model
+def predict_iron(features):
+    model = rf_model_iron()
+    return model.predict(features)
+
+# Prediction function for the 'silicate' model
+def predict_silicate(features):
+    # Load the model for 'silicate'
+    model = rf_model_silicate()
+    return model.predict(features)
 
 
 # Load data and train model
 data = generate_sample_data()
-model, scaler = train_model(data)
+# model, scaler = train_model(data)
 
 
 def dashboard_page():
@@ -150,61 +155,108 @@ def dashboard_page():
 def prediction_page():
     st.title("🎯 Prediction")
 
-    st.info("Enter values for each variable to get a prediction.")
+    st.info("Enter values for each variable to get predictions for both models. Below are the statistical ranges for each variable based on historical data:")
 
-    # Input fields
+    # Display the statistical summary for each variable
+    st.subheader("Variable Statistics")
+
+    # Input fields for each group of variables
+    st.subheader("Group 1: Feed and Flow Parameters")
     col1, col2 = st.columns(2)
 
-    with col1:
-        var1 = st.number_input(
-            "Variable 1",
-            value=50.0,
-            min_value=0.0,
-            max_value=100.0,
-            help="Enter value for Variable 1",
-        )
+    # Define variables and their range (min, max, mean)
+    variables_group_1 = {
+        '% Iron Feed': (43.37, 64.37, 57.09),
+        '% Silica Feed': (3.99, 32.23, 13.69),
+        'Starch Flow': (79.12, 6157.48, 2814.47),
+        'Amina Flow': (242.79, 736.51, 489.07),
+        'Ore Pulp Flow': (377.06, 417.88, 400.11),
+    }
 
-        var2 = st.number_input(
-            "Variable 2",
-            value=100.0,
-            min_value=0.0,
-            max_value=200.0,
-            help="Enter value for Variable 2",
-        )
+    for var_name, (min_val, max_val, mean_val) in variables_group_1.items():
+        with col1 if var_name in list(variables_group_1.keys())[:3] else col2:
+            st.write(f"{var_name} (Min: {min_val}, Max: {max_val}, Mean: {mean_val:.2f})")
+            st.session_state[var_name] = st.number_input(
+                f"Enter value for {var_name}",
+                value=mean_val,
+                min_value=min_val,
+                max_value=max_val,
+                help=f"Input value for {var_name} within the specified range."
+            )
 
-    with col2:
-        var3 = st.number_input(
-            "Variable 3",
-            value=500.0,
-            min_value=300.0,
-            max_value=700.0,
-            help="Enter value for Variable 3",
-        )
+    st.subheader("Group 2: Ore and Reagents Parameters")
+    col3, col4 = st.columns(2)
 
-        var4 = st.number_input(
-            "Variable 4",
-            value=25.0,
-            min_value=0.0,
-            max_value=50.0,
-            help="Enter value for Variable 4",
-        )
+    variables_group_2 = {
+        'Ore Pulp pH': (8.77, 10.81, 9.82),
+        'Ore Pulp Density': (1.52, 1.83, 1.68),
+        'Cell Spin Factor': (0.69, 50848.50, 14722.06),
+        'Bubble Size': (0.00, 50847.79, 14721.92),
+        'Iron Binding Agent (kg)': (10.05, 35.33, 24.11),
+        'Binder Activator (kg)': (10.05, 35.33, 24.56),
+    }
+
+    for var_name, (min_val, max_val, mean_val) in variables_group_2.items():
+        with col3 if var_name in list(variables_group_2.keys())[:3] else col4:
+            st.write(f"{var_name} (Min: {min_val}, Max: {max_val}, Mean: {mean_val:.2f})")
+            st.session_state[var_name] = st.number_input(
+                f"Enter value for {var_name}",
+                value=mean_val,
+                min_value=min_val,
+                max_value=max_val,
+                help=f"Input value for {var_name} within the specified range."
+            )
+
+    st.subheader("Group 3: Flotation Column Parameters")
+    col5, col6 = st.columns(2)
+
+    variables_group_3 = {
+        'Flotation Column 01 Air Flow': (287.06, 306.40, 300.36),
+        'Flotation Column 02 Air Flow': (196.52, 355.06, 285.85),
+        'Flotation Column 03 Air Flow': (199.73, 350.61, 286.15),
+        'Flotation Column 04 Air Flow': (182.05, 859.06, 528.06),
+        'Flotation Column 05 Air Flow': (227.96, 824.35, 528.83),
+        'Flotation Column 06 Air Flow': (135.21, 884.83, 535.82),
+        'Flotation Column 07 Air Flow': (165.66, 675.64, 424.26),
+        'Flotation Column 01 Level': (214.98, 674.07, 429.89),
+        'Flotation Column 02 Level': (203.73, 698.51, 431.33),
+        'Flotation Column 03 Level': (188.95, 655.50, 426.04),
+        'Flotation Column 04 Level': (188.95, 655.50, 426.04),
+        'Flotation Column 05 Level': (188.95, 655.50, 426.04),
+        'Flotation Column 06 Level': (188.95, 655.50, 426.04),
+        'Flotation Column 07 Level': (188.95, 655.50, 426.04),
+    }
+
+    for var_name, (min_val, max_val, mean_val) in variables_group_3.items():
+        with col5 if var_name in list(variables_group_3.keys())[:6] else col6:
+            st.write(f"{var_name} (Min: {min_val}, Max: {max_val}, Mean: {mean_val:.2f})")
+            st.session_state[var_name] = st.number_input(
+                f"Enter value for {var_name}",
+                value=mean_val,
+                min_value=min_val,
+                max_value=max_val,
+                help=f"Input value for {var_name} within the specified range."
+            )
 
     # Prediction button
     if st.button("🚀 Predict", type="primary"):
-        # Prepare features
-        features = pd.DataFrame(
-            {"var1": [var1], "var2": [var2], "var3": [var3], "var4": [var4]}
-        )
+        # Gather all inputs in a dictionary or dataframe
+        features = pd.DataFrame({
+            "% Iron Feed": [st.session_state["% Iron Feed"]],
+            "% Silica Feed": [st.session_state["% Silica Feed"]],
+            "Starch Flow": [st.session_state["Starch Flow"]],
+            "Amina Flow": [st.session_state["Amina Flow"]],
+            "Ore Pulp Flow": [st.session_state["Ore Pulp Flow"]],
+            # Continue for all features...
+        })
 
-        # Make prediction
-        prediction = predict(model, scaler, features)[0]
+        # You can then make predictions for both models here using the `predict_iron` and `predict_silicate` functions.
+        prediction_iron = predict_iron(features)
+        prediction_silicate = predict_silicate(features)
 
         # Show results
-        st.success(f"### Predicted Value: {prediction:.2f}")
-
-        # Input summary
-        st.subheader("Input Values:")
-        st.dataframe(features, use_container_width=True)
+        st.success(f"### Predicted Value for Iron Model: {prediction_iron[0]:.2f}")
+        st.success(f"### Predicted Value for Silicate Model: {prediction_silicate[0]:.2f}")
 
 def about_page():
     st.title("📖 Data Story Telling ;)")
@@ -235,6 +287,7 @@ def about_page():
         ## Story:
         - The dataset is quite largish with over 700k records. We realized pretty early that we have some insidious data which we tried to fix.
         - The rationale behind this was that we would lose over 3% (1.1% float, 1.9% categorical) of our data if we simply dropped it and we didn't want to do that. Maybe we should have in hindsight :p
+        - We found that we had data from the year 1824 lol, which was funny. We removed these records ofc.
         """
     )
     st.image('./images/missing data percentage.png', caption='Missing Data Pct', use_container_width=True)
@@ -268,8 +321,38 @@ def about_page():
     st.image('./images/corr.png', caption='Correlation Matrix', use_container_width=True)
     st.markdown("""
         - At this point we ran into a lot of deployment issues :(
-        - We had to use some workaround to try and get it to work.""")
+        - We had to use some workaround to try and get it to work.
+        - To be a little fancy we tried to mutlivariate imputation to replace the missing values.
+        - This ensures that we lose no data and we can rely on the other variables to populate the missing data.
+    """)
+    st.image('./images/imputation.png', caption='Multivariate Imputation', use_container_width=True)
+    st.markdown("""
+    - Some metrics based on the models we trained:
     
+    | **Metric** | **Silicate (Gradient Boosting)** | **Iron (Random Forest)** |
+    |------------|----------------------------------|--------------------------|
+    | **MAE**    | 0.844995479790331               | 1.3974971141781678       |
+    | **MAPE**   | 0.354705627497454               | 0.022798151402587872     |
+
+    - The Iron models are amazing.
+    - The silicate models could use some more work.
+    """)
+    st.markdown("""
+    - We also tried to do some feature importance analysis.
+    - Feature importance of the iron model:
+    """)
+    st.image('./images/iron_feat_imp.png', caption='Feature Importance FE', use_container_width=True)
+    st.markdown("""
+    - Feature importance of the silicate model:
+    """)
+    st.image('./images/si_feat_imp.png', caption='Feature Importance Silicate', use_container_width=True)
+    st.markdown("""
+        - We also have a trend analysis of the predicted variables for both the models against the originals"""
+    )
+    st.image('./images/iron_trend.png', caption='FE Trend Analysis', use_container_width=True)
+    st.image('./images/silicon_trend.png', caption='SI Trend Analysis', use_container_width=True)
+    
+
 # Sidebar navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select a page:", ["Dashboard", "Prediction", "Data Story"], index=2)
