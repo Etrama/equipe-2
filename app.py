@@ -206,16 +206,81 @@ def prediction_page():
         st.subheader("Input Values:")
         st.dataframe(features, use_container_width=True)
 
+def about_page():
+    st.title("📖 Data Story Telling ;)")
 
+    st.markdown(
+        """
+        ### Siackathon Team 2: Prediction App
+        Welcome to the **Prediction App** developed by **Siackathon Team 2**! 
+        This application allows you to visualize data, make predictions using machine learning, and explore trends in various variables over time.
+
+        ### Features
+        - **Dashboard**: Visualize the evolution of target variables with smoothing options.
+        - **Prediction**: Input your own values for prediction using a trained model.
+
+        ### Technologies Used
+        - Streamlit
+        - Plotly for data visualization
+        - Scikit-learn for machine learning
+
+        ## Team
+        - **Salha Yahia**
+        - **Mathieu Jacquand**
+        - **Kaushik Moudgalya**
+
+        ## Acknowledgements:
+        - No time to make ppt so Data Storytelling will have to suffice :)
+        
+        ## Story:
+        - The dataset is quite largish with over 700k records. We realized pretty early that we have some insidious data which we tried to fix.
+        - The rationale behind this was that we would lose over 3% (1.1% float, 1.9% categorical) of our data if we simply dropped it and we didn't want to do that. Maybe we should have in hindsight :p
+        """
+    )
+    st.image('./images/missing data percentage.png', caption='Missing Data Pct', use_container_width=True)
+    st.image('./images/missing_data.png', caption='Missing Data Example', use_container_width=True)
+    st.markdown(
+        """
+        - We then looked at the distrbution of the 4 target variables we were provided.
+        - The variables are NOT normally distributed and are pretty skewed.
+        - HOWEVER! We decided NOT to standardize the data as Salha had worked on a similar project before and we need to output real values at the end and not standardized values.
+        """)
+    st.image('./images/target_dist1.png', caption='Distribution of Target Variables', use_container_width=True)
+    st.markdown(
+        """
+        - We then looked at the distriubtion of the variables to see if we could find some outliers.
+        - We can clearly see that Cell Spin Factor and Bubble Size (ficitional variables) heavily favor just one value.
+        - The Flotation COlumns XX Air Flow are also interesting to look at as they seem to have a very discrete distribution.
+        - We will deal with their discrete nature if we have the time.
+        """)
+    st.image('./images/var_dist.png', caption='Distribution of Variables', use_container_width=True)
+    st.markdown(
+        """
+        - We then converted the categorical variables into numerical ones.
+        - Below are some patterns that we noticed:
+        """)
+    st.image('./images/cat variable clean.png', caption='AIR Error', use_container_width=True)
+    st.markdown("""
+        - Other than missing values we also noticed that there were some errors in the data.""")
+    st.image('./images/ERROR.png', caption='AIR Error', use_container_width=True)
+    st.markdown("""
+        - After dealing with all this we looked at the correlation between the variables.""")
+    st.image('./images/corr.png', caption='Correlation Matrix', use_container_width=True)
+    st.markdown("""
+        - At this point we ran into a lot of deployment issues :(
+        - We had to use some workaround to try and get it to work.""")
+    
 # Sidebar navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Select a page:", ["Dashboard", "Prediction"])
+page = st.sidebar.radio("Select a page:", ["Dashboard", "Prediction", "Data Story"], index=2)
 
 # Display selected page
 if page == "Dashboard":
     dashboard_page()
-else:
+elif page == "Prediction":
     prediction_page()
+else:
+    about_page()
 
 # Footer
 st.sidebar.markdown("---")
