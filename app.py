@@ -304,7 +304,26 @@ def prediction_page():
             "Starch Flow": [st.session_state["Starch Flow"]],
             "Amina Flow": [st.session_state["Amina Flow"]],
             "Ore Pulp Flow": [st.session_state["Ore Pulp Flow"]],
-            # Continue for all features...
+            "Ore Pulp pH": [st.session_state["Ore Pulp pH"]],
+            "Ore Pulp Density": [st.session_state["Ore Pulp Density"]],
+            "Cell Spin Factor": [st.session_state["Cell Spin Factor"]],
+            "Bubble Size": [st.session_state["Bubble Size"]],
+            "Iron Binding Agent (kg)": [st.session_state["Iron Binding Agent (kg)"]],
+            "Binder Activator (kg)": [st.session_state["Binder Activator (kg)"]],
+            "Flotation Column 01 Air Flow": [st.session_state["Flotation Column 01 Air Flow"]],
+            "Flotation Column 02 Air Flow": [st.session_state["Flotation Column 02 Air Flow"]],
+            "Flotation Column 03 Air Flow": [st.session_state["Flotation Column 03 Air Flow"]],
+            "Flotation Column 04 Air Flow": [st.session_state["Flotation Column 04 Air Flow"]],
+            "Flotation Column 05 Air Flow": [st.session_state["Flotation Column 05 Air Flow"]],
+            "Flotation Column 06 Air Flow": [st.session_state["Flotation Column 06 Air Flow"]],
+            "Flotation Column 07 Air Flow": [st.session_state["Flotation Column 07 Air Flow"]],
+            "Flotation Column 01 Level": [st.session_state["Flotation Column 01 Level"]],
+            "Flotation Column 02 Level": [st.session_state["Flotation Column 02 Level"]],
+            "Flotation Column 03 Level": [st.session_state["Flotation Column 03 Level"]],
+            "Flotation Column 04 Level": [st.session_state["Flotation Column 04 Level"]],
+            "Flotation Column 05 Level": [st.session_state["Flotation Column 05 Level"]],
+            "Flotation Column 06 Level": [st.session_state["Flotation Column 06 Level"]],
+            "Flotation Column 07 Level": [st.session_state["Flotation Column 07 Level"]],
         })
 
         # You can then make predictions for both models here using the `predict_iron` and `predict_silicate` functions.
@@ -408,7 +427,10 @@ def about_page():
     )
     st.image('./images/iron_trend.png', caption='FE Trend Analysis', use_container_width=True)
     st.image('./images/silicon_trend.png', caption='SI Trend Analysis', use_container_width=True)
-    
+    st.markdown("""
+        iron:  Trend Random Forest:  0.6800501882057717
+        silica: Trend Gradient Boosting:  0.5633626097867002"""
+    )
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
