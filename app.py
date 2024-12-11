@@ -3,6 +3,7 @@ import pickle
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+import psycopg2
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 
@@ -151,6 +152,62 @@ def dashboard_page():
         st.metric("Max", f"{smooth_target.max():.2f}")
         st.metric("Min", f"{smooth_target.min():.2f}")
 
+def db_health():
+    st.title(" ⚗️ Database Health")
+
+    st.info("Tables and null check.")
+
+    host = st.text_input("Host", placeholder="hostname")
+    port = st.text_input("Port", placeholder="portnb")
+    database = st.text_input("Database", placeholder="mydatabase")
+    username = st.text_input("Username", placeholder="myuser")
+    password = st.text_input("Password", type="password")
+    # Create a function to connect to the database and get the null counts
+    def get_null_counts(host, port, database, username, password):
+        try:
+            # Connect to the database
+            conn = psycopg2.connect(
+                host=host,
+                port=port,
+                database=database,
+                user=username,
+                password=password
+            )
+            
+            # Get the list of tables in the database
+            cur = conn.cursor()
+            cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='public';")
+            tables = [row[0] for row in cur.fetchall()]
+            
+            # Create a dictionary to store the null counts
+            null_counts = {}
+            
+            # Loop through each table and get the null counts
+            for table in tables:
+                cur.execute(f"SELECT * FROM {table};")
+                rows = cur.fetchall()
+                columns = [desc[0] for desc in cur.description]
+                df = pd.DataFrame(rows, columns=columns)
+                null_counts[table] = df.isnull().sum().to_dict()
+            
+            # Close the connection
+            conn.close()
+            
+            return null_counts
+        
+        except psycopg2.Error as e:
+            st.error(f"Error connecting to the database: {e}")
+            return None
+    # Create a button to connect to the database and get the null counts
+    if st.button("Connect and Get Null Counts"):
+        null_counts = get_null_counts(host, port, database, username, password)
+        
+        if null_counts is not None:
+            # Display the null counts
+            st.header("Null Counts")
+            for table, counts in null_counts.items():
+                st.subheader(table)
+                st.write(counts)
 
 def prediction_page():
     st.title("🎯 Prediction")
@@ -355,13 +412,15 @@ def about_page():
 
 # Sidebar navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Select a page:", ["Dashboard", "Prediction", "Data Story"], index=2)
+page = st.sidebar.radio("Select a page:", ["Dashboard", "Prediction", "Data Story", "DB Health"], index=2)
 
 # Display selected page
 if page == "Dashboard":
     dashboard_page()
 elif page == "Prediction":
     prediction_page()
+elif page == "DB Health":
+    db_health()
 else:
     about_page()
 
